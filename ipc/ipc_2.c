@@ -1,7 +1,8 @@
-              /*Implement communication between two related processes using one pipe*/
-
-
 /*
+Name: Amrita N.S
+Date: 18-02-2024
+Description: Implement communication between two related processes using one pipe
+
 Requirements: 
 
 Create two child process and execute commands passed from command-line arguments 
