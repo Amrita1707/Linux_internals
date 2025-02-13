@@ -1,92 +1,59 @@
 /*
-Name: Amrita N.S
-Date: 15-02-2024
-Description: WAP to understand usage of dup and dup2 system calls
+dup, dup2, dup3 - duplicate a file descriptor
 
-Pre-requisites:
+int dup(int oldfd);
+       
+DESCRIPTION
+       The  dup()  system  call  creates a copy of the file descriptor oldfd, using the lowest-numbered unused file descriptor for the new
+       descriptor.
+       After a successful return, the old and new file descriptors may be used interchangeably.  They refer to the same open file descrip‐
+       tion  (see open(2)) and thus share file offset and file status flags;
 
-Knowledge about system calls, How to read and understand ‘man pages’.
-Command line arguments, File operation system calls (open, read, write, close ..etc)
-Working of dup system calls.
-Objective:
-To understand and implement using basic system calls.
-
-Requirements:
-
-Using dup or dup2 redirect printf out to a given file instead of printing to stdout.
-Pass the file name using command-line arguments.
-Try using both system calls (dup and dup2).
-Sample Execution:
-./dup_dup2 f1.txt
-Print this message into file
-Print this message into STDOUT
+RETURN VALUE
+       On success, these system calls return the new file descriptor.  On error, -1 is returned, and errno is set appropriately.
 
 */
 
-#include <unistd.h>
-#include <errno.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
 
-int main(int argc, char *argv[])
+int main()
 {
-	  int opt;
-	  printf("select the option\n");
-      printf("1:dup\n2:dup2\n");
-      scanf("%d",&opt);
+	  int fd = open("file.txt",O_WRONLY);
 
-      if(opt==1)
+	  // Save the original stdout file descriptor 
+	  int std_out = dup(1);
+
+	  // Check if the file was opened successfully  
+	  if(fd == -1)
 	  {
-     	//open the file in write mode
-	  	int fd = open(argv[1],O_WRONLY);
-
-	  	if(fd == -1)
-	  	{
 			perror("open");
 			return -1;
-	  	}
-	 
-	 	//backup of stdout
-	  	int newfd = dup(1);
-	  	close(1);
-
-       	//redirect nessage into file.txt
-	 	int f = dup(fd);
-	  	printf("dup: This statement should be displayed in the file\n");
-	 	close(f);
-	 
-     	//print the msg in stdout
-	  	int std = dup(newfd);
-	   	printf("dup:This statement should be displayed in the stdout\n");
-	  	close(std);	  
-	 }
-	 else
-	 {
-         //open the file in write mode
-         int fd = open(argv[1],O_WRONLY);
- 
-         if(fd == -1)
-         {
-              perror("open");
-              return -1;
-         }
-
-         //backup of stdout
-	   	 int newfd ;
-		 dup2(newfd,1);
-	 	 close(1);
-
-     	 //redirect nessage into file.txt
-	  	 int f = dup2(fd,1);
-	  	 printf("dup2: This statement should be displayed in the file\n");
-	  	 close(f);
-	 
-      	 //print the msg in stdout
-	  	 int std = dup2(newfd,1);
-	  	 printf("dup2:This statement should be displayed in the stdout\n");
-	   	 close(std);
-		 
 	  }
+
+	  // Print a message to the standard output (console)  
+	  printf("This will printed in stdout\n");
+
+	  // Close stdout (file descriptor 1)  
+	  close(1);
+
+	  // Duplicate fd (file.txt) to stdout, so now all stdout output goes to file.txt 
+	  dup(fd);
+
+	  // This message will now be redirected to file.txt instead of the console  
+	  printf("This will printed in file\n");
+
+	  // Close the file descriptor for file.txt
+	  close(fd);
+
+	  // Close the redirected stdout (fd 1) 
+	  close(1);
+
+	  // Restore the original stdout using the saved descriptor  
+	  //dup(std_out);
+	  return 0;
 }
+
